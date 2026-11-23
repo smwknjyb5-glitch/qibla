@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>اتجاه القبلة</title>
+<style>
+:root{--navy:#0b1a33;--navy2:#14284d;--gold:#e0b84f;--gold2:#f4dc94;--ink:#e9eefb;--mute:#9fb0d0;--ok:#4fd18b}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;color:var(--ink);
+background:radial-gradient(circle at 20% 10%,#1b3568 0,transparent 40%),radial-gradient(circle at 80% 90%,#16305e 0,transparent 45%),var(--navy);
+padding:env(safe-area-inset-top,0) 14px calc(env(safe-area-inset-bottom,0) + 20px);line-height:1.8}
+.stars{position:fixed;inset:0;pointer-events:none;opacity:.5;
+background-image:radial-gradient(1.2px 1.2px at 12% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 78% 14%,#fff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 55% 62%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 30% 80%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 90% 70%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 8% 55%,#fff 50%,transparent 51%)}
+main{position:relative;max-width:460px;margin:0 auto}
+h1{font-size:1.6rem;text-align:center;color:var(--gold2);padding:18px 0 2px}
+.sub{text-align:center;color:var(--mute);font-size:.95rem;margin-bottom:14px}
+.dialwrap{position:relative;width:min(86vw,340px);aspect-ratio:1;margin:8px auto 14px}
+.dial{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,var(--navy2) 0,#0d1f3f 70%);
+border:3px solid var(--gold);box-shadow:0 0 0 6px rgba(224,184,79,.12),0 10px 40px rgba(0,0,0,.5);transition:box-shadow .3s}
+.dialwrap.ok .dial{box-shadow:0 0 0 6px rgba(79,209,139,.3),0 0 40px rgba(79,209,139,.55);border-color:var(--ok)}
+.rot{position:absolute;inset:0;will-change:transform}
+.rot svg{width:100%;height:100%;display:block}
+.fix{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;
+border-left:11px solid transparent;border-right:11px solid transparent;border-top:20px solid var(--gold2)}
+.hub{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:var(--gold)}
+.msg{text-align:center;min-height:2.2em;font-size:1.05rem;margin-bottom:10px}
+.msg.ok{color:var(--ok);font-weight:700}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.stat{background:rgba(255,255,255,.05);border:1px solid rgba(224,184,79,.25);border-radius:12px;padding:8px 4px;text-align:center}
+.stat b{display:block;font-size:1.25rem;color:var(--gold2);direction:ltr}
+.stat span{font-size:.8rem;color:var(--mute)}
+button,select,input{font:inherit}
+.btn{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--gold);color:#1a1405;font-weight:700;font-size:1.05rem;margin-bottom:10px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--gold2);border:1.5px solid var(--gold)}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(224,184,79,.25);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h2{font-size:1rem;color:var(--gold2);margin-bottom:6px}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.row>*{flex:1;min-width:0}
+select,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(224,184,79,.4);background:#0d1f3f;color:var(--ink);direction:ltr;text-align:center}
+select{direction:rtl;text-align:right}
+ul{padding-inline-start:20px;color:var(--mute);font-size:.92rem}
+.loc{text-align:center;color:var(--mute);font-size:.9rem;margin-bottom:8px;direction:ltr}
+.err{color:#ff9d9d}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<main>
+<h1>اتجاه القبلة</h1>
+<p class="sub">ضع الهاتف أفقيًا على سطح مستوٍ، ثم أدِره حتى يتحول الإطار إلى الأخضر</p>
+
+<div class="dialwrap" id="dialwrap">
+  <div class="fix" aria-hidden="true"></div>
+  <div class="dial"></div>
+  <div class="rot" id="rot">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <g id="ticks"></g>
+      <text x="100" y="31" text-anchor="middle" fill="#ff8f8f" font-size="15" font-weight="700">ش</text>
+      <text x="100" y="180" text-anchor="middle" fill="#9fb0d0" font-size="12">ج</text>
+      <text x="172" y="105" text-anchor="middle" fill="#9fb0d0" font-size="12">ق</text>
+      <text x="28" y="105" text-anchor="middle" fill="#9fb0d0" font-size="12">غ</text>
+      <g id="qmark" transform="rotate(0 100 100)">
+        <line x1="100" y1="100" x2="100" y2="44" stroke="#e0b84f" stroke-width="3" stroke-linecap="round"/>
+        <rect x="88" y="20" width="24" height="24" rx="2" fill="#111"/>
+        <rect x="88" y="26" width="24" height="4" fill="#e0b84f"/>
+      </g>
+    </svg>
+  </div>
+  <div class="hub"></div>
+</div>
+
+<div class="msg" id="msg" aria-live="polite">اضغط «تشغيل البوصلة» للبدء</div>
+
+<div class="stats">
+  <div class="stat"><b id="sQ">--</b><span>زاوية القبلة من الشمال</span></div>
+  <div class="stat"><b id="sH">--</b><span>اتجاه الهاتف</span></div>
+  <div class="stat"><b id="sD">--</b><span>المسافة إلى مكة (كم)</span></div>
+</div>
+
+<button class="btn" id="start">تشغيل البوصلة وتحديد موقعي</button>
+<div class="loc" id="loc"></div>
+
+<div class="card">
+  <h2>إن لم يعمل تحديد الموقع</h2>
+  <div class="row">
+    <select id="city" aria-label="اختيار مدينة">
+      <option value="">اختر مدينة…</option>
+      <option value="36.7538,3.0588">الجزائر العاصمة</option>
+      <option value="35.6971,-0.6308">وهران</option>
+      <option value="36.365,6.6147">قسنطينة</option>
+      <option value="36.9,7.7667">عنابة</option>
+      <option value="36.19,5.41">سطيف</option>
+      <option value="35.555,6.174">باتنة</option>
+      <option value="34.878,-1.315">تلمسان</option>
+      <option value="31.617,-2.217">بشار</option>
+      <option value="31.95,5.325">ورقلة</option>
+      <option value="22.785,5.522">تمنراست</option>
+      <option value="33.5731,-7.5898">الدار البيضاء</option>
+      <option value="36.8065,10.1815">تونس</option>
+      <option value="30.0444,31.2357">القاهرة</option>
+      <option value="48.8566,2.3522">باريس</option>
+    </select>
+  </div>
+  <div class="row">
+    <input id="lat" type="number" step="any" placeholder="خط العرض" inputmode="decimal">
+    <input id="lng" type="number" step="any" placeholder="خط الطول" inputmode="decimal">
+  </div>
+  <button class="btn sec" id="manual">اعتمد هذا الموقع</button>
+</div>
+
+<div class="card">
+  <h2>للحصول على أدق نتيجة</h2>
+  <ul>
+    <li>حرّك الهاتف على شكل الرقم ٨ لمعايرة البوصلة.</li>
+    <li>ابتعد عن المعادن والمغناطيس والأجهزة الكهربائية.</li>
+    <li>أخرج الهاتف من غلاف مغناطيسي إن وُجد.</li>
+    <li>إن تعذرت البوصلة، استعمل «زاوية القبلة من الشمال» مع بوصلة عادية.</li>
+  </ul>
+</div>
+</main>
+
+<script>
+(function(){
+  var KAABA={lat:21.422487,lng:39.826206};
+  var $=function(i){return document.getElementById(i)};
+  var rot=$('rot'),qmark=$('qmark'),msg=$('msg'),wrap=$('dialwrap');
+  var pos=null,qibla=null,heading=null,smooth=null,listening=false;
+
+  // graduations
+  var t='';
+  for(var a=0;a<360;a+=10){
+    var big=a%90===0,len=big?10:5;
+    t+='<line x1="100" y1="'+(8)+'" x2="100" y2="'+(8+len)+'" stroke="'+(big?'#e0b84f':'#5b6f99')+'" stroke-width="'+(big?2:1)+'" transform="rotate('+a+' 100 100)"/>';
+  }
+  $('ticks').innerHTML=t;
+
+  function rad(d){return d*Math.PI/180}
+  function deg(r){return r*180/Math.PI}
+  function norm(d){return (d%360+360)%360}
+
+  function compute(lat,lng){
+    var p1=rad(lat),p2=rad(KAABA.lat),dl=rad(KAABA.lng-lng);
+    var y=Math.sin(dl)*Math.cos(p2);
+    var x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+    var b=norm(deg(Math.atan2(y,x)));
+    var dp=p2-p1,R=6371;
+    var h=Math.sin(dp/2)*Math.sin(dp/2)+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
+    var d=2*R*Math.asin(Math.sqrt(h));
+    return {bearing:b,dist:d};
+  }
+
+  function setPos(lat,lng,label){
+    pos={lat:lat,lng:lng};
+    var r=compute(lat,lng);
+    qibla=r.bearing;
+    $('sQ').textContent=Math.round(qibla)+'°';
+    $('sD').textContent=Math.round(r.dist).toLocaleString('en');
+    $('loc').textContent=label+' ('+lat.toFixed(4)+', '+lng.toFixed(4)+')';
+    qmark.setAttribute('transform','rotate('+qibla+' 100 100)');
+    if(heading===null){msg.className='msg';msg.textContent='القبلة على بُعد '+Math.round(qibla)+'° من الشمال، شغّل البوصلة للتوجيه';}
+  }
+
+  function onHeading(h){
+    // low-pass filter on a circle
+    if(smooth===null)smooth=h;
+    else{
+      var d=((h-smooth+540)%360)-180;
+      smooth=norm(smooth+d*0.2);
+    }
+    heading=smooth;
+    rot.style.transform='rotate('+(-heading)+'deg)';
+    $('sH').textContent=Math.round(heading)+'°';
+    if(qibla===null)return;
+    var diff=((qibla-heading+540)%360)-180;
+    if(Math.abs(diff)<=4){
+      wrap.classList.add('ok');msg.className='msg ok';msg.textContent='أنت الآن متجه نحو القبلة';
+      if(navigator.vibrate&&!wrap._v){navigator.vibrate(40);wrap._v=1;}
+    }else{
+      wrap.classList.remove('ok');wrap._v=0;msg.className='msg';
+      msg.textContent=diff>0?'أدِر الهاتف نحو اليمين '+Math.round(Math.abs(diff))+'°':'أدِر الهاتف نحو اليسار '+Math.round(Math.abs(diff))+'°';
+    }
+  }
+
+  function handler(e){
+    var h=null;
+    if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)){
+      h=e.webkitCompassHeading; // iOS
+    }else if(e.alpha!==null&&e.alpha!==undefined){
+      if(e.type==='deviceorientationabsolute'||e.absolute===true){
+        h=360-e.alpha; // Android absolute
+      }
+    }
+    if(h===null)return;
+    var sa=(screen.orientation&&screen.orientation.angle)||0;
+    onHeading(norm(h+sa));
+  }
+
+  function startCompass(){
+    if(listening)return;
+    var begin=function(){
+      listening=true;
+      if('ondeviceorientationabsolute' in window){
+        window.addEventListener('deviceorientationabsolute',handler,true);
+      }else{
+        window.addEventListener('deviceorientation',handler,true);
+      }
+      setTimeout(function(){
+        if(heading===null){msg.className='msg err';msg.textContent='لا يوجد حساس بوصلة في هذا المتصفح. استعمل زاوية القبلة مع بوصلة عادية.';}
+      },3000);
+    };
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+      DeviceOrientationEvent.requestPermission().then(function(s){
+        if(s==='granted')begin();
+        else{msg.className='msg err';msg.textContent='تم رفض إذن الحساسات. فعّله من إعدادات المتصفح.';}
+      }).catch(function(){msg.className='msg err';msg.textContent='تعذر طلب إذن الحساسات.';});
+    }else begin();
+  }
+
+  function locate(){
+    if(!navigator.geolocation){msg.className='msg err';msg.textContent='تحديد الموقع غير مدعوم. اختر مدينة يدويًا.';return;}
+    msg.className='msg';msg.textContent='جارٍ تحديد موقعك…';
+    navigator.geolocation.getCurrentPosition(function(p){
+      setPos(p.coords.latitude,p.coords.longitude,'موقعك الحالي');
+    },function(){
+      msg.className='msg err';msg.textContent='تعذر تحديد الموقع. اختر مدينة أو أدخل الإحداثيات.';
+    },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  }
+
+  $('start').addEventListener('click',function(){
+    startCompass();   // must run inside the tap for iOS permission
+    locate();
+  });
+
+  $('city').addEventListener('change',function(){
+    if(!this.value)return;
+    var p=this.value.split(',');
+    var name=this.options[this.selectedIndex].text;
+    $('lat').value=p[0];$('lng').value=p[1];
+    setPos(parseFloat(p[0]),parseFloat(p[1]),name);
+    startCompass();
+  });
+
+  $('manual').addEventListener('click',function(){
+    var la=parseFloat($('lat').value),ln=parseFloat($('lng').value);
+    if(isNaN(la)||isNaN(ln)||la<-90||la>90||ln<-180||ln>180){
+      msg.className='msg err';msg.textContent='أدخل إحداثيات صحيحة (العرض بين -90 و90، الطول بين -180 و180).';return;
+    }
+    setPos(la,ln,'موقع يدوي');
+    startCompass();
+  });
+})();
+</script>
+</body>
+</html>
